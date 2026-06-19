@@ -1,0 +1,71 @@
+{
+  "manifest_version": 3,
+  "name": "Tariff Tools Suite",
+  "version": "3.3.2",
+  "description": "Экспорт, массовое создание, импорт и инструменты редактирования тарифов.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://mow-delivery-calculator.dns-shop.ru/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Tariff Tools Suite"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mow-delivery-calculator.dns-shop.ru/configurator/tariffs",
+        "https://mow-delivery-calculator.dns-shop.ru/configurator/tariffs/",
+        "https://mow-delivery-calculator.dns-shop.ru/configurator/tariffs/*",
+        "https://mow-delivery-calculator.dns-shop.ru/configurator/tariffs/*/*",
+        "https://mow-delivery-calculator.dns-shop.ru/configurator/del-orgs",
+        "https://mow-delivery-calculator.dns-shop.ru/configurator/del-orgs/*"
+      ],
+      "css": ["content.css"],
+      "js": [
+        "resize-core.js",
+        "autofill-content.js",
+        "resize-dialog.js",
+        "resize-intervals-dialog.js",
+        "resize-branches-dialog.js",
+        "resize-schedule-dialog.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://mow-delivery-calculator.dns-shop.ru/configurator/tariffs",
+        "https://mow-delivery-calculator.dns-shop.ru/configurator/tariffs/",
+        "https://mow-delivery-calculator.dns-shop.ru/configurator/tariffs/*"
+      ],
+      "js": [
+        "plugin-core.js",          
+        "xlsx.full.min.js",
+        "tariff-customizer.js",
+        "tariff-updater.js",
+        "tariff-creator.js",
+        "tariff-renamer.js",
+        "tariff-tools-content.js",
+        "pvz-tariff-creator.js"     
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://mow-delivery-calculator.dns-shop.ru/configurator/tariffs/*/*"
+      ],
+      "js": [
+        "tariff-page-collector.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}

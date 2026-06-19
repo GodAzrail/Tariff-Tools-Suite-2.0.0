@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Tariff Tools Suite</title>
+  <style>
+    :root{
+      --bg:#0b1120;
+      --panel:#111827;
+      --border:rgba(148,163,184,.18);
+      --text:#e5edf8;
+      --muted:#94a3b8;
+      --accent:#60a5fa;
+      --accent-2:#3b82f6;
+      --success:#4ade80;
+      --shadow:0 12px 30px rgba(0,0,0,.35);
+      --radius:16px;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      width:420px; /* увеличили ширину */
+      padding:16px; /* чуть компактнее */
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(59,130,246,.18), transparent 32%),
+        linear-gradient(180deg, #0b1120 0%, #0f172a 100%);
+    }
+
+    .wrap{
+      display:flex;
+      flex-direction:column;
+      gap:12px; /* меньше расстояния */
+    }
+
+    .hero{
+      background:linear-gradient(135deg, rgba(59,130,246,.22), rgba(15,23,42,.9));
+      border:1px solid rgba(96,165,250,.18);
+      border-radius:18px;
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+
+    .title{
+      margin:0;
+      font-size:18px;
+      font-weight:700;
+    }
+
+    .subtitle{
+      margin:6px 0 0;
+      color:#c7d2fe;
+      font-size:12px;
+      line-height:1.4;
+    }
+
+    .card{
+      background:rgba(17,24,39,.9);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      box-shadow:var(--shadow);
+    }
+
+    .card-title{
+      margin:0 0 8px;
+      font-size:12px;
+      font-weight:700;
+      color:#bfdbfe;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .features{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin:0;
+      padding:0;
+      list-style:none;
+    }
+
+    .feature{
+      background:#0f172a;
+      border:1px solid rgba(148,163,184,.12);
+      border-radius:10px;
+      padding:8px;
+      font-size:11px;
+      color:#dbe7f5;
+      line-height:1.35;
+    }
+
+    .feature strong{
+      display:block;
+      margin-bottom:2px;
+      font-size:11px;
+      color:#f8fafc;
+    }
+
+    .desc{
+      margin:0;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .status{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(148,163,184,.16);
+      background:#0f172a;
+      color:#dbe7f5;
+      font-size:12px;
+      line-height:1.45;
+      white-space:pre-line;
+    }
+
+    .btn{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+      padding:10px;
+      border-radius:12px;
+      text-decoration:none;
+      font-weight:600;
+      font-size:13px;
+      color:white;
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow:0 8px 20px rgba(37,99,235,.25);
+    }
+
+    .footer{
+      text-align:center;
+      color:#64748b;
+      font-size:10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <section class="hero">
+      <h1 class="title">Tariff Tools Suite</h1>
+      <p class="subtitle">
+        Инструменты для массовой работы с тарифами, импорта, экспорта и настройки.
+      </p>
+      <div id="status" class="status">Проверка активной вкладки…</div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Возможности</div>
+      <ul class="features">
+        <li class="feature"><strong>Создание</strong> Массовое добавление тарифов</li>
+        <li class="feature"><strong>Импорт</strong> Загрузка данных</li>
+        <li class="feature"><strong>Экспорт</strong> Выгрузка тарифов</li>
+        <li class="feature"><strong>Редактирование</strong> Быстрое обновление</li>
+        <li class="feature"><strong>Автозаполнение</strong> Ускорение работы</li>
+        <li class="feature"><strong>UI</strong> Улучшенный интерфейс</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Быстрый доступ</div>
+      <p class="desc">
+      </p>
+      <div style="margin-top:10px;">
+        <a
+          href="https://mow-delivery-calculator.dns-shop.ru/configurator"
+          target="_blank"
+          class="btn"
+          rel="noreferrer"
+        >
+          Открыть тарификатор
+        </a>
+      </div>
+    </section>
+
+    <div class="footer">
+      Tariff Tools Suite
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
