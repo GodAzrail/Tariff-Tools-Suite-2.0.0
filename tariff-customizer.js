@@ -1,4 +1,4 @@
-// tariff-customizer.js - патч совместимости с React
+// tariff-customizer.js - v6 (Dual-Defense React Patch)
 (function() {
     'use strict';
 
@@ -43,13 +43,14 @@
             this.currentCardForMenu = null;
             this.currentTariffIdForMenu = null;
             
-            console.log('[TariffCustomizer] ========== ИНИЦИАЛИЗАЦИЯ ==========');
-            this.patchReactDOM(); // Инжектим защиту от падений React
+            console.log('[TariffCustomizer] ========== ИНИЦИАЛИЗАЦИЯ v6 ==========');
+            this.patchReactDOM(); 
+            this.setupTabInterception(); // Перехват кликов по вкладкам
             this.init();
         }
 
         // ==========================================
-        // ПАТЧ: Защита от падений React (NotFoundError)
+        // ПАТЧ 1: Абсолютное подавление NotFoundError
         // ==========================================
         patchReactDOM() {
             if (window.__tariffReactPatched) return;
@@ -57,22 +58,60 @@
             
             const originalRemoveChild = Node.prototype.removeChild;
             Node.prototype.removeChild = function(child) {
-                if (child && child.parentNode && child.parentNode !== this) {
-                    // React пытается удалить элемент из старого места, а мы его переместили в колонку
-                    return originalRemoveChild.call(child.parentNode, child);
+                try {
+                    return originalRemoveChild.call(this, child);
+                } catch (e) {
+                    if (e.name === 'NotFoundError') {
+                        // React потерял элемент. Пытаемся удалить его оттуда, где он сейчас находится.
+                        if (child && child.parentNode) {
+                            try { return originalRemoveChild.call(child.parentNode, child); } catch (err) {}
+                        }
+                        return child; // Глушим ошибку, отдаем React то, что он просил
+                    }
+                    throw e;
                 }
-                if (child && !child.parentNode) return child; // Элемента уже нет в DOM
-                return originalRemoveChild.call(this, child);
             };
 
             const originalInsertBefore = Node.prototype.insertBefore;
             Node.prototype.insertBefore = function(newNode, referenceNode) {
-                if (referenceNode && referenceNode.parentNode && referenceNode.parentNode !== this) {
-                    // Опорный узел был перемещен нами, вставляем рядом с ним в новом месте
-                    return originalInsertBefore.call(referenceNode.parentNode, newNode, referenceNode);
+                try {
+                    return originalInsertBefore.call(this, newNode, referenceNode);
+                } catch (e) {
+                    if (e.name === 'NotFoundError') {
+                        if (referenceNode && referenceNode.parentNode) {
+                            try { return originalInsertBefore.call(referenceNode.parentNode, newNode, referenceNode); } catch (err) {}
+                        }
+                        try { return this.appendChild(newNode); } catch(err) {}
+                        return newNode;
+                    }
+                    throw e;
                 }
-                return originalInsertBefore.call(this, newNode, referenceNode);
             };
+        }
+
+        // ==========================================
+        // ПАТЧ 2: Перехват вкладок до срабатывания React
+        // ==========================================
+        setupTabInterception() {
+            if (window.__tariffTabListener) return;
+            window.__tariffTabListener = true;
+
+            // Используем mousedown и capture:true, чтобы сработать ДО того как React обработает onClick
+            document.addEventListener('mousedown', (e) => {
+                const tabBtn = e.target.closest('.css-1h3gid1 button, ._transientButton_o6g7k_1');
+                if (tabBtn && this.initialized && !this.isDestroying) {
+                    console.log('[TariffCustomizer] Переключение вкладки! Экстренный сброс DOM для React...');
+                    
+                    // Блокируем наши обсерверы, чтобы не мешать
+                    this.isUpdating = true; 
+                    this.destroy(); // Возвращаем карточки на место
+                    
+                    // Перезапускаемся, когда React закончит рендер новой вкладки
+                    setTimeout(() => {
+                        this.init();
+                    }, 400);
+                }
+            }, true);
         }
 
         isExportPauseActive() {
@@ -232,17 +271,20 @@
             ['#tariff-customizer-styles', '#tariff-force-styles'].forEach(id => { const el = document.querySelector(id); if (el) el.remove(); });
 
             const layout = document.querySelector('.tariff-layout');
-            if (layout && this.container && document.body.contains(this.container)) {
+            if (layout && this.container) {
                 const allCards = [];
                 layout.querySelectorAll('.tariff-column').forEach(column => {
-                    const cards = Array.from(column.querySelectorAll('.css-nr5n4g'));
-                    cards.forEach(card => card.removeAttribute('draggable'));
-                    allCards.push(...cards);
+                    Array.from(column.children).forEach(child => {
+                        if (child.classList && child.classList.contains('css-nr5n4g')) {
+                            child.removeAttribute('draggable');
+                            allCards.push(child);
+                        }
+                    });
                 });
                 
-                // Аккуратно возвращаем карточки в корень React-контейнера, не трогая другие элементы
+                // Возвращаем карточки в оригинальный контейнер, чтобы React нашел их при удалении
                 allCards.forEach(card => {
-                    if (card && card.parentNode) this.container.appendChild(card);
+                    try { this.container.appendChild(card); } catch(e) {}
                 });
                 layout.remove();
             }
@@ -367,10 +409,8 @@
             if (!this.initialized) return;
             this.isUpdating = true;
             
-            // ПАТЧ: Отлавливаем карточки, которые React только что кинул в корень контейнера,
-            // и перемещаем их в mainColumn до того, как скрипт попытается их обработать.
             if (this.container && this.mainColumn) {
-                const orphanCards = Array.from(this.container.children).filter(el => el.classList.contains('css-nr5n4g'));
+                const orphanCards = Array.from(this.container.children).filter(el => el.classList && el.classList.contains('css-nr5n4g'));
                 orphanCards.forEach(card => this.mainColumn.appendChild(card));
             }
 
@@ -435,9 +475,8 @@
             
             layout.appendChild(topColumns); layout.appendChild(bottomColumns);
             
-            // ПАТЧ: Отказались от innerHTML = '' (он убивал React-узлы). Просто переносим карточки.
             const originalCards = Array.from(this.container.querySelectorAll('.css-nr5n4g'));
-            this.container.insertBefore(layout, this.container.firstChild); // Вставляем лейаут
+            this.container.insertBefore(layout, this.container.firstChild);
             
             this.favoriteColumn = favoriteColumn; this.vipColumn = vipColumn; this.superColumn = superColumn; this.mainColumn = mainColumn;
             
@@ -588,7 +627,7 @@
         }
 
         saveSettings() {
-            localStorage.setItem(this.storageKey, JSON.stringify({ favoriteTariffs: Array.from(this.favoriteTariffs), vipTariffs: Array.from(this.vipTariffs), superTariffs: Array.from(this.superTariffs), tariffPositions: this.tariffPositions, version: '3.2', timestamp: Date.now() }));
+            localStorage.setItem(this.storageKey, JSON.stringify({ favoriteTariffs: Array.from(this.favoriteTariffs), vipTariffs: Array.from(this.vipTariffs), superTariffs: Array.from(this.superTariffs), tariffPositions: this.tariffPositions, version: '3.3', timestamp: Date.now() }));
         }
 
         loadSettings() {
