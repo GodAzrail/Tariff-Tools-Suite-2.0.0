@@ -1221,9 +1221,29 @@
             const bulkReturn = dialog.querySelector('#af-bulk2');
             
             if (bulkInternal && bulkCustomer) {
-                const internalValues = mgxRows.map(r => r.internal).filter(v => v && v !== '');
-                const customerValues = mgxRows.map(r => r.customer).filter(v => v && v !== '');
-                const returnValues = mgxRows.map(r => r.return).filter(v => v && v !== '');
+                const cleanMgxValue = (val) => {
+                    if (!val) return '';
+                    const s = String(val).trim();
+                    // Берем только целую часть до первой запятой или точки (дробная часть отбрасывается, чтобы тарификатор не склеивал цифры)
+                    const idxComma = s.indexOf(',');
+                    const idxDot = s.indexOf('.');
+                    let cutIdx = -1;
+                    if (idxComma !== -1 && idxDot !== -1) {
+                        cutIdx = Math.min(idxComma, idxDot);
+                    } else if (idxComma !== -1) {
+                        cutIdx = idxComma;
+                    } else if (idxDot !== -1) {
+                        cutIdx = idxDot;
+                    }
+                    if (cutIdx !== -1) {
+                        return s.substring(0, cutIdx).trim();
+                    }
+                    return s;
+                };
+
+                const internalValues = mgxRows.map(r => cleanMgxValue(r.internal)).filter(v => v && v !== '');
+                const customerValues = mgxRows.map(r => cleanMgxValue(r.customer)).filter(v => v && v !== '');
+                const returnValues = mgxRows.map(r => cleanMgxValue(r.return)).filter(v => v && v !== '');
                 
                 if (internalValues.length > 0) {
                     bulkInternal.value = internalValues.join('\n');
@@ -1590,7 +1610,7 @@
                     <div id="sidebar-update-progress-text" style="text-align: center; font-size: 12px; color: #94a3b8;">0%</div>
                 </div>
                 
-                <div id="sidebar-update-log" style="flex: 1 1 auto; min-height: 0; background: #0f172a; margin: 0 16px 16px 16px; padding: 12px; border-radius: 8px; overflow-y: auto; overflow-x: hidden; font-size: 11px; line-height: 1.4; font-family: monospace; white-space: pre-wrap; word-break: break-word;"></div>
+                <div id="sidebar-update-log" style="flex: 1 1 auto; min-height: 0; background: #0f172a; margin: 0 16px 16ms 16ms; padding: 12px; border-radius: 8px; overflow-y: auto; overflow-x: hidden; font-size: 11px; line-height: 1.4; font-family: monospace; white-space: pre-wrap; word-break: break-word;"></div>
                 
                 <div style="padding: 16px; border-top: 1px solid #334155;">
                     <button id="sidebar-update-stop-btn" style="width: 100%; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">⏹️ Остановить импорт</button>
