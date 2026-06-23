@@ -1,4 +1,4 @@
-<img width="1024" height="1024" alt="kAzQj" src="https://github.com/user-attachments/assets/cd29267e-eafa-4aff-a0ba-3b5063ee6bbe" />
+<img width="2048" height="2048" alt="Gemini_Generated_Image_3g4hyy3g4hyy3g4h" src="https://github.com/user-attachments/assets/50d8ce3e-4c8f-449c-b5e3-ea330cc470a6" />
 
 
 # Tariff Tools Suite
