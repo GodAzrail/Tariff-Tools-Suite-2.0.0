@@ -1,4 +1,4 @@
-// resize-intervals-dialog.js - fixed for /configurator/del-orgs
+
 (function() {
     'use strict';
     console.log('📏 resize-intervals-dialog.js loaded (del-orgs fixed)');
